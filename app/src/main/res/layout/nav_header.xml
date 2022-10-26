@@ -8,13 +8,6 @@
     android:padding="16dp"
     android:gravity="bottom">
 
-    <ImageView
-        android:textColor="@color/white"
-        android:src="@mipmap/ic_launcher"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
-
-    </ImageView>
     <TextView
         android:text="Simple Calculator"
         android:textColor="@color/white"
@@ -24,7 +17,7 @@
 
     </TextView>
     <TextView
-        android:text="by dev"
+        android:text=""
         android:textColor="@color/white"
         android:paddingTop="8dp"
         android:layout_width="wrap_content"

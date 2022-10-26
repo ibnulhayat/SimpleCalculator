@@ -20,6 +20,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import com.google.android.material.navigation.NavigationView;
 
 import java.math.BigDecimal;
+import java.util.Stack;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private final String TAG = "MainActivity ";
@@ -284,8 +285,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onClick(View v) {
                 try {
-                    tvsec.setText(bpi.getText());
-                    tvmain.setText(tvmain.getText() + "×" + pi);
+                    int length = tvmain.getText().toString().length();
+                    if (length > 0) {
+                        String text = tvmain.getText().toString();
+                        if (!text.contains(pi) && defineLastCharacter(text.charAt(length - 1) + ""))
+                            tvmain.setText(tvmain.getText() + "×" + pi);
+                    } else {
+                        tvsec.setText(bpi.getText());
+                        tvmain.setText(tvmain.getText() + pi);
+                    }
                 } catch (Exception e) {
                 }
             }
@@ -330,10 +338,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onClick(View v) {
                 try {
-                    int val = Integer.parseInt(tvmain.getText().toString());
-                    int fact = factorial(val);
-                    tvmain.setText(String.valueOf(fact));
-                    tvsec.setText(val + "!");
+                    if (!tvmain.getText().toString().isEmpty())
+                        addOperand("!");
                 } catch (Exception e) {
                 }
             }
@@ -342,14 +348,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onClick(View v) {
                 try {
-                    double d = Double.parseDouble(tvmain.getText().toString());
-                    double square = d * d;
-                    String result = String.valueOf(square);
-                    if (result.contains(".")) {
-                        result = result.replaceAll("\\.?0*$", "");
-                    }
-                    tvmain.setText(result);
-                    tvsec.setText(d + "²");
+                    String text = tvmain.getText().toString();
+//                    double d = Double.parseDouble(tvmain.getText().toString());
+//                    double square = d * d;
+//                    String result = String.valueOf(square);
+//                    if (result.contains(".")) {
+//                        result = result.replaceAll("\\.?0*$", "");
+//                    }
+                    tvmain.setText(text + "²");
+//                    tvsec.setText(d + "²");
                 } catch (Exception e) {
                 }
             }
@@ -377,6 +384,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onClick(View v) {
                 try {
                     String val = tvmain.getText().toString();
+                    boolean cash = false;
+                    if(val.contains("!")){
+                        tvsec.setText(val);
+                        val = addFact(val);
+                        cash = true;
+                    }
+                    if(val.contains("²")){
+                        tvsec.setText(val);
+                        val = addPow(val);
+                        cash = true;
+                    }
                     String replacedstr = val.replace('÷', '/').replace('×', '*').replaceAll("%", "/100");
                     double total = eval(replacedstr);
                     BigDecimal decimal = new BigDecimal(total);
@@ -385,11 +403,37 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         result = result.replaceAll("\\.?0*$", "");
                     }
                     tvmain.setText(result);
-                    tvsec.setText(val);
+                    if (!cash) tvsec.setText(val);
                 } catch (Exception e) {
                 }
             }
         });
+    }
+
+    private String addFact(String str) {
+        String num = "";
+        StringBuilder stBui = new StringBuilder();
+        for(int i = 0; i< str.length(); i++){
+            if (str.charAt(i) == '!') stBui.append(factorial(Integer.parseInt(num)));
+            else if(str.charAt(i) == '+' || str.charAt(i) == '-' ||  str.charAt(i) == '÷' ||  str.charAt(i) == '×'){
+                stBui.append(str.charAt(i));
+                num = "";
+            }else num += str.charAt(i);
+        }
+        return  stBui.toString();
+    }
+
+    private String addPow(String str) {
+        String num = "";
+        StringBuilder stBui = new StringBuilder();
+        for(int i = 0; i< str.length(); i++){
+            if (str.charAt(i) == '²') stBui.append((Integer.parseInt(num) * Integer.parseInt(num)));
+            else if(str.charAt(i) == '+' || str.charAt(i) == '-' ||  str.charAt(i) == '÷' ||  str.charAt(i) == '×'){
+                stBui.append(str.charAt(i));
+                num = "";
+            }else num += str.charAt(i);
+        }
+        return  stBui.toString();
     }
 
     private boolean addOperand(String operand) {
@@ -527,7 +571,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     throw new RuntimeException("Unexpected: " + (char) ch);
                 }
 
-                if (eat('^')) x = Math.pow(x, parseFactor()); // exponentiation
+                if (eat('^')) x = Math.pow(x, parseFactor()); // exponentiation "²"
 
                 return x;
             }
